@@ -94,10 +94,10 @@ DATABASES = {
             'NAME': 'test_fooddb',
             'options': '-c search_path=django,testfooddb'
         },
-        'USER': 'postgres',
-        'NAME': 'postgres',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
+        'USER': 'ugsscftpngcuym',
+        'NAME': 'd1ub9pofgqi8nd',
+        'PASSWORD': 'a924328dda1246f591065e3336fbc6dcb8c780b31a3df69fe54bbb4e1315872d',
+        'HOST': 'ec2-54-75-224-168.eu-west-1.compute.amazonaws.com',
         'PORT': '5432',
     }
 }
