@@ -87,13 +87,13 @@ TEST_RUNNER = 'myfoodapp.test.runner.PostgresSchemaTestRunner'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'OPTIONS': {
-            'options': '-c search_path=django,fooddb,testfooddb'
-        },
-        'TEST': {
-            'NAME': 'test_fooddb',
-            'options': '-c search_path=django,testfooddb'
-        },
+        #'OPTIONS': {
+        #    'options': '-c search_path=django,fooddb,testfooddb'
+        #},
+        #'TEST': {
+        #    'NAME': 'test_fooddb',
+        #    'options': '-c search_path=django,testfooddb'
+        #},
         'USER': 'ugsscftpngcuym',
         'NAME': 'd1ub9pofgqi8nd',
         'PASSWORD': 'a924328dda1246f591065e3336fbc6dcb8c780b31a3df69fe54bbb4e1315872d',
