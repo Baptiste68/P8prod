@@ -1,0 +1,4 @@
+env/
+foodbapp/__pycache__
+myfoodapp/__pycache__/
+myfoodapp/migrations/__pycache__/
