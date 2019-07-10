@@ -37,6 +37,19 @@ def initiate():
     create_foodcate(Food.objects.get(id=id_food1), Categories.objects.get(id=id_category))
     create_foodcate(Food.objects.get(id=id_food2), Categories.objects.get(id=id_category))
 
+class GeneralTest(TestCase):
+    def test_index(self):
+        response = self.client.get(reverse('myfoodapp:index'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_legals(self):
+        response = self.client.get(reverse('myfoodapp:legals'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_creationsuccess(self):
+        response = self.client.get(reverse('myfoodapp:creationsuccess'))
+        self.assertEqual(response.status_code, 200)
+
 class UserTest(TestCase):
     def setUp(self):
         # Create some users
@@ -68,11 +81,14 @@ class UserTest(TestCase):
         id_food2 = Food.objects.only(
             'id').get(name_food="chocolat").id
         log = self.client.login(username='basim', password='simba')
-        factory = RequestFactory()
-        request = factory.get('/saved/', {'sub' : id_food1, 'tosub' : id_food2, 'user' : user})
         self.client.force_login(self.user_1)
-        saving = SavedView.get(self, request)
-        self.assertEqual(saving.status_code, 200)
+        user = User.objects.get(email="bas@bas.bas")
+        response = self.client.get(reverse('myfoodapp:saved'), {
+            'sub' : id_food1, 
+            'tosub' : id_food2,
+            'user' : user
+        })
+        self.assertEqual(response.status_code, 200)
         
 
     def cleanUp(self):

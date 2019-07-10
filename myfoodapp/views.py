@@ -94,9 +94,9 @@ class PopulateView(generic.ListView):
     def get(self, request):
         display(request)
         categories_list = ["Boissons", "Viandes", "Surgelés", "Conserves",
-                           "Fromages", "Biscuits", "Chocolats", "Apéritifs", "Soupes", "Pizzas",
+                           "Fromages", "Biscuits", "Chocolats", "Apéritif", "Soupes", "Pizzas",
                            "Snacks", "Epicerie", "Sauces", "Gâteaux", "Yaourts", "Jus de fruits",
-                           "Pains", "Vins", "Huiles", "Miels"]
+                           "Pains", "Graines", "Huiles", "Poissons"]
         for category in categories_list:
             print(category)
             print(Categories.objects.filter(name_categories=category).exists())
@@ -105,25 +105,34 @@ class PopulateView(generic.ListView):
                 my_insert.save()
                 page = 1
                 k = 0
+                url = ""
                 while k < 40:
                     i = 0
+                    print(url)
                     while i < 19 and k < 40:
                         url = "https://fr.openfoodfacts.org/category/" + category + "/\
-            " + str(page) + ".json"
+" + str(page) + ".json"
                         response = requests.get(url)
                         if(response.ok):
                             jData = json.loads(response.content)
-                            print(jData.get('products')[i].get(
+                            print("Nutri tag: " + jData.get('products')[i].get(
                                 'nutrition_grades_tags')[0])
                             print(i)
                             if len(jData.get('products')[i].get('nutrition_grades_tags')[0])\
                                     is not 1:
                                 i = i + 1
+                                print("nutri grade fail: ")
+                                print(jData.get('products')[i].get('nutrition_grades_tags')[0])
                             elif jData.get('products')[i].get('product_name_fr') is None:
                                 i = i + 1
+                                print("No name: ")
+                                print(jData.get('products')[i].get('product_name_fr'))
                             elif len(jData.get('products')[i].get('product_name_fr')) < 1:
                                 i = i + 1
+                                print("No name 2: ")
+                                print(jData.get('products')[i].get('product_name_fr'))
                             else:
+                                print("in the else")
                                 product_name = str(jData.get('products')[
                                                    i].get('product_name_fr'))
                                 product_name = product_name.replace('\\', '')
@@ -142,6 +151,7 @@ class PopulateView(generic.ListView):
                                 link = str(jData.get('products')[i].get('url'))
                                 img = str(jData.get('products')
                                           [i].get('image_url'))
+                                print("name food : " + product_name)
                                 if not Food.objects.filter(name_food=product_name).exists():
                                     my_insert = Food(
                                         name_food=product_name,
@@ -152,6 +162,7 @@ class PopulateView(generic.ListView):
                                         link_food=link,
                                         img_food=img,
                                     )
+                                    print("pre insert")
                                     my_insert.save()
                                     my_id = my_insert.id
 
@@ -164,9 +175,13 @@ class PopulateView(generic.ListView):
                                         my_insert = foodcate(Food_id=Food.objects.get(
                                             id=my_id), Categories_id=Categories.objects.get(id=id_category))
                                         my_insert.save()
+                                        print("foodcate")
+                                    
+                                    k = k + 1
 
-                                k = k + 1
                                 i = i + 1
+
+                        print("i: " + str(i) + " k: "+ str(k) +" page: "+ str(page))
                     page = page + 1
                     print(k)
 
