@@ -18,5 +18,4 @@ urlpatterns = [
     path('creationsuccess/', views.creation, name='creationsuccess'),
     path('my_view', views.ProductView.as_view(), name='my_view'),
     path('legals/', views.legals, name='legals'),
-    path('failsearch/', views.failsearch, name='failsearch'),
 ]
