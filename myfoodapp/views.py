@@ -76,19 +76,24 @@ def deconnexion(request):
     logout(request)
     return redirect(reverse('myfoodapp:connexion'))
 
+
 def legals(request):
     return render(request, 'myfoodapp/legals.html')
 
+
 def failsearch(request):
     return render(request, 'myfoodapp/failsearch.html')
+
 
 class CompteView(generic.ListView):
     model = User
     template_name = 'myfoodapp/compte.html'
 
+
 def display(request):
     template_name = 'myfoodapp/populate.html'
     return render(request, template_name)
+
 
 class PopulateView(generic.ListView):
     model = User
