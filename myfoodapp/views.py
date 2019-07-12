@@ -79,6 +79,9 @@ def deconnexion(request):
 def legals(request):
     return render(request, 'myfoodapp/legals.html')
 
+def failsearch(request):
+    return render(request, 'myfoodapp/failsearch.html')
+
 class CompteView(generic.ListView):
     model = User
     template_name = 'myfoodapp/compte.html'
@@ -210,13 +213,15 @@ def get_better_food(product, category):
 
     results = []
 
+    id_ref = Food.objects.only('id').get(name_food=product).id
+    print("id ref " + str(id_ref))
     for id in candidate_ids:
-        candidate_score = Food.objects.only('nutri_score_food').get(
-            id=id['Food_id_id']).nutri_score_food
-        candidate_score = ord(candidate_score)
-        print(candidate_score)
-        if candidate_score < nutri_score:
-            results.append(id)
+        if id['Food_id_id'] is not id_ref: # check that it is not the aliment to sub
+            candidate_score = Food.objects.only('nutri_score_food').get(
+                id=id['Food_id_id']).nutri_score_food
+            candidate_score = ord(candidate_score)
+            if candidate_score <= nutri_score:
+                results.append(id)
 
     print(results)
 
@@ -228,7 +233,10 @@ class SearchView(generic.ListView):
 
     def get(self, request):
         aliment = request.GET['product']
-        id_to_sub = Food.objects.only('id').get(name_food=aliment).id
+        if not Food.objects.filter(name_food=aliment).exists():
+            return render(request, 'myfoodapp/failsearch.html')
+        else:
+            id_to_sub = Food.objects.only('id').get(name_food=aliment).id
         bkg_img = Food.objects.only('img_food').get(id=id_to_sub).img_food
         category = searching_cat(aliment)
         list_id = get_better_food(aliment, category)
@@ -309,19 +317,3 @@ class MyFoodView(generic.ListView):
         return render(request, self.template_name, {'my_result': my_result})   
 
 class DetailsView(generic.ListView):
-    template_name = 'myfoodapp/details.html'
-
-    def get(self, request):
-        sub = request.GET['sub']
-        issub = request.GET['issub']
-        sub_det = Food.objects.filter(id=sub).values(
-                'name_food', 'img_food', 'nutri_score_food')
-        issub_det = Food.objects.filter(id=issub).values(
-                'name_food', 'img_food', 'nutri_score_food')
-        return render(request, self.template_name, {'sub_id': sub, 'issub_id': issub,
-                                                    'sub_name': sub_det[0]['name_food'],
-                                                    'sub_img': sub_det[0]['img_food'], 
-                                                    'sub_score': sub_det[0]['nutri_score_food'], 
-                                                    'issub_name': issub_det[0]['name_food'],
-                                                    'issub_img': issub_det[0]['img_food'],
-                                                    'issub_score': issub_det[0]['nutri_score_food']})
