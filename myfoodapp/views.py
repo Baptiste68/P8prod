@@ -18,6 +18,9 @@ from .forms import ConnexionForm, NewUserForm
 
 
 class IndexView(View):
+    """
+        Class view for index
+    """
     template_name = 'myfoodapp/index.html'
 
     def get(self, request):
@@ -25,6 +28,9 @@ class IndexView(View):
 
 
 def creation(request):
+    """
+        Function to create new user
+    """
     errorusr = False
     erroremail = False
 
@@ -56,6 +62,9 @@ def creation(request):
 
 
 def connexion(request):
+    """
+        Function to connect
+    """
     error = False
     if request.method == "POST":
         form = ConnexionForm(request.POST)
@@ -88,11 +97,18 @@ def failsearch(request):
 
 
 class CompteView(generic.ListView):
+    """
+        Class view for account info
+    """
     model = User
     template_name = 'myfoodapp/compte.html'
 
 
 def display(request):
+    """
+        Function for database view after
+        populate
+    """
     template_name = 'myfoodapp/populate.html'
     return render(request, template_name)
 
@@ -102,44 +118,53 @@ class PopulateView(generic.ListView):
     template_name = 'myfoodapp/populate.html'
 
     def get(self, request):
+        """
+            Function that populate the DB
+            via the API OpenFoodFacts
+        """
         display(request)
         categories_list = ["Boissons", "Viandes", "Surgelés", "Conserves",
-                           "Fromages", "Biscuits", "Chocolats", "Apéritif", "Soupes", "Pizzas",
-                           "Snacks", "Epicerie", "Sauces", "Gâteaux", "Yaourts", "Jus de fruits",
+                           "Fromages", "Biscuits", "Chocolats", "Apéritif",
+                           "Soupes", "Pizzas", "Snacks", "Epicerie",
+                           "Sauces", "Gâteaux", "Yaourts", "Jus de fruits",
                            "Pains", "Graines", "Huiles", "Poissons"]
         for category in categories_list:
             print(category)
             print(Categories.objects.filter(name_categories=category).exists())
-            if not Categories.objects.filter(name_categories=category).exists():
+            if not Categories.objects.filter(
+                    name_categories=category).exists():
                 my_insert = Categories(name_categories=category)
                 my_insert.save()
                 page = 1
                 k = 0
                 url = ""
-                while k < 40:
+                while k < 40:   # k is the number of food per category
                     i = 0
                     print(url)
                     while i < 19 and k < 40:
                         url = "https://fr.openfoodfacts.org/category/" + category + "/\
 " + str(page) + ".json"
                         response = requests.get(url)
-                        if(response.ok):
+                        if(response.ok):    # if answer is ok we take info
                             jData = json.loads(response.content)
                             print("Nutri tag: " + jData.get('products')[i].get(
                                 'nutrition_grades_tags')[0])
                             print(i)
-                            if len(jData.get('products')[i].get('nutrition_grades_tags')[0])\
+                            if len(jData.get('products')[i]
+                                   .get('nutrition_grades_tags')[0])\
                                     is not 1:
                                 i = i + 1
                                 print("nutri grade fail: ")
                                 print(jData.get('products')[i].get(
                                     'nutrition_grades_tags')[0])
-                            elif jData.get('products')[i].get('product_name_fr') is None:
+                            elif jData.get('products')[i]
+                            .get('product_name_fr') is None:
                                 i = i + 1
                                 print("No name: ")
                                 print(jData.get('products')[
                                       i].get('product_name_fr'))
-                            elif len(jData.get('products')[i].get('product_name_fr')) < 1:
+                            elif len(jData.get('products')[i]
+                                     .get('product_name_fr')) < 1:
                                 i = i + 1
                                 print("No name 2: ")
                                 print(jData.get('products')[
@@ -158,14 +183,15 @@ class PopulateView(generic.ListView):
                                 stores = str(jData.get('products')
                                              [i].get('stores'))
                                 stores = stores.replace('\\', '')
-                                nutri_score = str(jData.get('products')[
-                                                  i].get('nutrition_grades_tags')[0])
+                                nutri_score = str(jData.get('products')[i]
+                                                  .get('nutrition_grades_tags')[0])
                                 nutri_score = nutri_score.replace('\\', '')
                                 link = str(jData.get('products')[i].get('url'))
                                 img = str(jData.get('products')
                                           [i].get('image_url'))
                                 print("name food : " + product_name)
-                                if not Food.objects.filter(name_food=product_name).exists():
+                                if not Food.objects.filter(
+                                        name_food=product_name).exists():
                                     my_insert = Food(
                                         name_food=product_name,
                                         quantity_food=quantity,
@@ -182,11 +208,14 @@ class PopulateView(generic.ListView):
                                     id_category = Categories.objects.only(
                                         'id').get(name_categories=category).id
 
-                                    if not foodcate.objects.filter(Food_id=my_id, Categories_id=id_category).exists():
-                                        print("food id: "+str(my_id) +
-                                              " cate : "+str(id_category))
-                                        my_insert = foodcate(Food_id=Food.objects.get(
-                                            id=my_id), Categories_id=Categories.objects.get(id=id_category))
+                                    if not foodcate.objects.filter(
+                                            Food_id=my_id,
+                                            Categories_id=id_category).exists():
+                                        my_insert = foodcate(
+                                            Food_id=Food.objects.get(
+                                                id=my_id),
+                                            Categories_id=Categories
+                                            .objects.get(id=id_category))
                                         my_insert.save()
                                         print("foodcate")
 
@@ -203,6 +232,10 @@ class PopulateView(generic.ListView):
 
 
 def searching_cat(product):
+    """
+        Function that get the category
+        of the product we want to substitute
+    """
     id_prod = Food.objects.only('id').get(name_food=product).id
     id_cat = foodcate.objects.only('Categories_id_id').get(
         Food_id_id=id_prod).Categories_id_id
@@ -213,9 +246,14 @@ def searching_cat(product):
 
 
 def get_better_food(product, category):
+    """
+        Function that search all foods within a
+        category that are a higher or equal
+        nutri-score than the product given
+    """
     nutri_score = Food.objects.only('nutri_score_food').get(
         name_food=product).nutri_score_food
-    nutri_score = ord(nutri_score)
+    nutri_score = ord(nutri_score)  # score of the product
 
     id_category = Categories.objects.only(
         'id').get(name_categories=category).id
@@ -226,18 +264,22 @@ def get_better_food(product, category):
 
     id_ref = Food.objects.only('id').get(name_food=product).id
     for id in candidate_ids:
-        if id['Food_id_id'] is not id_ref: # check that it is not the aliment to sub
+        # check that it is not the aliment to sub
+        if id['Food_id_id'] is not id_ref:
             candidate_score = Food.objects.only('nutri_score_food').get(
                 id=id['Food_id_id']).nutri_score_food
             candidate_score = ord(candidate_score)
             if candidate_score <= nutri_score:
                 results.append(id)
 
-
     return results
 
 
 class SearchView(generic.ListView):
+    """
+        This view display all the food
+        found with the get_better_food function
+    """
     template_name = 'myfoodapp/search.html'
 
     def get(self, request):
@@ -255,35 +297,51 @@ class SearchView(generic.ListView):
                 temp = Food.objects.filter(id=id['Food_id_id']).values(
                     'name_food', 'nutri_score_food', 'id', 'img_food')
                 my_result.append(
-                    {'name_food': temp[0]['name_food'], 'nutri_score_food': temp[0]['nutri_score_food'],
-                    'id': temp[0]['id'], 'img_food': temp[0]['img_food']})
+                    {'name_food': temp[0]['name_food'],
+                     'nutri_score_food': temp[0]['nutri_score_food'],
+                     'id': temp[0]['id'], 'img_food': temp[0]['img_food']})
 
-            return render(request, self.template_name, {'aliment': aliment, 'category': category,
-                                                        'my_result': my_result, 'id_to_sub': id_to_sub,
+            return render(request, self.template_name, {'aliment': aliment,
+                                                        'category': category,
+                                                        'my_result': my_result,
+                                                        'id_to_sub': id_to_sub,
                                                         'bkg_img': bkg_img})
 
 
 class ProductView(generic.ListView):
+    """
+        View of a product with nutri-score,
+        picture and a link to OpenFoodFacts
+    """
     template_name = 'myfoodapp/product.html'
 
     def get(self, request):
         product_id = request.GET['product']
 
         temp = Food.objects.filter(id=product_id).values(
-            'name_food', 'nutri_score_food', 'quantity_food', 'link_food', 'img_food')
-        my_product = ({'name_food': temp[0]['name_food'], 'nutri_score_food': temp[0]['nutri_score_food'],
-                       'quantity_food': temp[0]['quantity_food'], 'link_food': temp[0]['link_food'],
+            'name_food', 'nutri_score_food', 'quantity_food', 'link_food',
+            'img_food')
+        my_product = ({'name_food': temp[0]['name_food'],
+                       'nutri_score_food': temp[0]['nutri_score_food'],
+                       'quantity_food': temp[0]['quantity_food'],
+                       'link_food': temp[0]['link_food'],
                        'img_food': temp[0]['img_food']})
 
         score_range = ['a', 'b', 'c', 'd', 'e']
 
-        return render(request, self.template_name, {'my_product': my_product, 'score_range': score_range})
+        return render(request, self.template_name, {'my_product': my_product,
+                                                    'score_range': score_range}
+                      )
 
 
 class SavedView(generic.ListView):
-    # Id might lead to confusion
-    # issub = is substituted
-    # sub = substitute the food. It is the new food
+    """
+        View you get after your saved food
+        Note:
+        Id might lead to confusion
+        issub = is substituted
+        sub = substitute the food. It is the new food
+    """
     template_name = 'myfoodapp/saved.html'
 
     def get(self, request):
@@ -295,16 +353,24 @@ class SavedView(generic.ListView):
         logged = False
         if id_user is not None:
             logged = True
-            if not saved.objects.filter(User_id_saved_id=id_user, Food_id_foodissub_id=tosub, Food_id_foodsub_id=sub).exists():
+            if not saved.objects.filter(User_id_saved_id=id_user,
+                                        Food_id_foodissub_id=tosub,
+                                        Food_id_foodsub_id=sub
+                                        ).exists():
                 my_insert = saved(
-                    User_id_saved_id=id_user, Food_id_foodissub_id=tosub, Food_id_foodsub_id=sub)
+                    User_id_saved_id=id_user, Food_id_foodissub_id=tosub,
+                    Food_id_foodsub_id=sub)
                 my_insert.save()
                 inserted = True
 
-        return render(request, self.template_name, {'inserted': inserted, 'logged': logged})
+        return render(request, self.template_name, {'inserted': inserted,
+                                                    'logged': logged})
 
 
 class MyFoodView(generic.ListView):
+    """
+        View to see your saved food
+    """
     template_name = 'myfoodapp/viewsaved.html'
 
     def get(self, request):
@@ -317,10 +383,12 @@ class MyFoodView(generic.ListView):
             temp = saved.objects.filter(User_id_saved_id=id_user).values(
                 'Food_id_foodissub_id', 'Food_id_foodsub_id')
             for i in temp:
-                temp_sub = Food.objects.filter(id=i['Food_id_foodsub_id']).values(
+                temp_sub = Food.objects.filter(
+                    id=i['Food_id_foodsub_id']).values(
                     'name_food', 'nutri_score_food', 'img_food', 'id')
                 my_result.append(
-                    {'name_food': temp_sub[0]['name_food'], 'nutri_score_food': temp_sub[0]['nutri_score_food'],
+                    {'name_food': temp_sub[0]['name_food'],
+                     'nutri_score_food': temp_sub[0]['nutri_score_food'],
                      'id': temp_sub[0]['id'], 'img_food': temp_sub[0]['img_food'],
                      'food_is_sub_id': i['Food_id_foodissub_id']})
 
@@ -328,6 +396,10 @@ class MyFoodView(generic.ListView):
 
 
 class DetailsView(generic.ListView):
+    """
+        View to see your saved food details.
+        You see what the food is a substitute for
+    """
     template_name = 'myfoodapp/details.html'
 
     def get(self, request):
